@@ -41,6 +41,9 @@ bool AlbertoClass::operator<(AlbertoClass const& other)
 {
 	return this->m_nAge < other.m_nAge;
 }
+bool AlbertoClass::operator<=(AlbertoClass const& other) {
+	return this->m_nAge <= other.m_nAge;
+}
 
 //Accessors
 void AlbertoClass::SetAge(int a_nAge){ m_nAge = a_nAge; }

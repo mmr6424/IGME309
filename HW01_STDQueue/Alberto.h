@@ -64,6 +64,12 @@ public:
 	Output: true if this object is smaller than other
 	*/
 	bool operator<(AlbertoClass const& other);
+	/*
+	Usage: Smaller or equal to
+	Arguments: class object to verify
+	Output: true if this object is smaller than other
+	*/
+	bool operator<=(AlbertoClass const& other);
 
 	/*
 	Usage: Gets data member

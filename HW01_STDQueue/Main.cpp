@@ -12,7 +12,7 @@ void Print(std::deque<T> a_queue)
 	std::cout << "End of queue............" << std::endl;
 }
 
-int main(void)
+/*int main(void)
 {
 	std::deque<int> myQueue;
 	//Push elements
@@ -84,4 +84,4 @@ int main(void)
 
 	
 	getchar();
-}
+}*/
