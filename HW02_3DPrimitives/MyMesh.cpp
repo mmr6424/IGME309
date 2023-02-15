@@ -44,6 +44,7 @@ void MyMesh::GenerateCube(float a_fSize, vector3 a_v3Color)
 	CompleteMesh(a_v3Color);
 	CompileOpenGL3X();
 }
+//--- Completed ---//
 void MyMesh::GenerateCone(float a_fRadius, float a_fHeight, int a_nSubdivisions, vector3 a_v3Color)
 {
 	if (a_fRadius < 0.01f)
@@ -61,13 +62,37 @@ void MyMesh::GenerateCone(float a_fRadius, float a_fHeight, int a_nSubdivisions,
 	Init();
 
 	// Replace this with your code
-	GenerateCube(a_fRadius * 2.0f, a_v3Color);
+	//GenerateCube(a_fRadius * 2.0f, a_v3Color);
+	std::vector<vector3> a_vPoints;
+	float a_fPointIncrement = (2 * PI) / a_nSubdivisions;
+	float a_fAngle = 0;
+	for (int x = 0; x < a_nSubdivisions; x++)
+	{
+		float r = a_fRadius * cos(a_fAngle);
+		float k = a_fRadius * sin(a_fAngle);
+		// The division by 2 ensures that the axis of rotation is around the CENTER of the object, not around its bottom point
+		a_vPoints.push_back(vector3(r, k, a_fHeight / 2));
+		a_fAngle += a_fPointIncrement;
+	}
+
+	for (int i = 0; i < a_nSubdivisions; i++)
+	{
+		// The division by 2 ensures that the axis of rotation is around the CENTER of the object, not around its bottom point
+		AddTri(vector3(0.0f, 0.0f, a_fHeight / 2),
+			a_vPoints[i],
+			a_vPoints[(i + 1) % a_nSubdivisions]);
+		// The negative ensures that the height of the cone is correct, as the distance between height/2 and -height/2 is height
+		AddTri(vector3(0.0f, 0.0f, -a_fHeight / 2),
+			a_vPoints[(i + 1) % a_nSubdivisions],
+			a_vPoints[i]);
+	}
 	// -------------------------------
 
 	// Adding information about color
 	CompleteMesh(a_v3Color);
 	CompileOpenGL3X();
 }
+//--- Completed ---//
 void MyMesh::GenerateCylinder(float a_fRadius, float a_fHeight, int a_nSubdivisions, vector3 a_v3Color)
 {
 	if (a_fRadius < 0.01f)
@@ -85,13 +110,44 @@ void MyMesh::GenerateCylinder(float a_fRadius, float a_fHeight, int a_nSubdivisi
 	Init();
 
 	// Replace this with your code
-	GenerateCube(a_fRadius * 2.0f, a_v3Color);
+	//GenerateCube(a_fRadius * 2.0f, a_v3Color);
+	std::vector<vector3> a_vBotPoints, a_vTopPoints;
+	float a_fPointIncrement = (2 * PI) / a_nSubdivisions;
+	float a_fAngle = 0;
+	for (int x = 0; x < a_nSubdivisions; x++)
+	{
+		float r = a_fRadius * cos(a_fAngle);
+		float k = a_fRadius * sin(a_fAngle);
+		// The division by 2 ensures that the axis of rotation is around the CENTER of the object, not around its bottom point
+		a_vBotPoints.push_back(vector3(r, k, -a_fHeight / 2));
+		a_vTopPoints.push_back(vector3(r, k, a_fHeight / 2));
+		a_fAngle += a_fPointIncrement;
+	}
+
+	for (int i = 0; i < a_nSubdivisions; i++)
+	{
+		// Draw the "Bottom" of the Cylinder
+		AddTri(vector3(0.0f, 0.0f, -a_fHeight / 2),
+			a_vBotPoints[(i + 1) % a_nSubdivisions],
+			a_vBotPoints[i]);
+		// Draw the Center of the Cylinder
+		AddQuad(a_vBotPoints[i],
+			a_vBotPoints[(i + 1) % a_nSubdivisions],
+			a_vTopPoints[i],
+			a_vTopPoints[(i + 1) % a_nSubdivisions]);
+		// Draw the "Top" of the Cylinder
+		AddTri(vector3(0.0f, 0.0f, a_fHeight / 2),
+			a_vTopPoints[i],
+			a_vTopPoints[(i + 1) % a_nSubdivisions]);
+
+	}
 	// -------------------------------
 
 	// Adding information about color
 	CompleteMesh(a_v3Color);
 	CompileOpenGL3X();
 }
+//--- Completed ---//
 void MyMesh::GenerateTube(float a_fOuterRadius, float a_fInnerRadius, float a_fHeight, int a_nSubdivisions, vector3 a_v3Color)
 {
 	if (a_fOuterRadius < 0.01f)
@@ -115,7 +171,49 @@ void MyMesh::GenerateTube(float a_fOuterRadius, float a_fInnerRadius, float a_fH
 	Init();
 
 	// Replace this with your code
-	GenerateCube(a_fOuterRadius * 2.0f, a_v3Color);
+	//GenerateCube(a_fOuterRadius * 2.0f, a_v3Color);
+	std::vector<vector3> a_vBotOuterPoints, a_vTopOuterPoints, a_vBotInnerPoints, a_vTopInnerPoints;
+	float a_fPointIncrement = (2 * PI) / a_nSubdivisions;
+	float a_fAngle = 0;
+	for (int x = 0; x < a_nSubdivisions; x++)
+	{
+		float r = cos(a_fAngle);
+		float k = sin(a_fAngle);
+		// The division by 2 ensures that the axis of rotation is around the CENTER of the object, not around its bottom point
+		// Grab the outer points
+		a_vBotOuterPoints.push_back(vector3(a_fOuterRadius * r, a_fOuterRadius * k, -a_fHeight / 2));
+		a_vTopOuterPoints.push_back(vector3(a_fOuterRadius * r, a_fOuterRadius * k, a_fHeight / 2));
+		// Grab the inner points
+		a_vBotInnerPoints.push_back(vector3(a_fInnerRadius * r, a_fInnerRadius * k, -a_fHeight / 2));
+		a_vTopInnerPoints.push_back(vector3(a_fInnerRadius * r, a_fInnerRadius * k, a_fHeight / 2));
+		a_fAngle += a_fPointIncrement;
+	}
+
+	for (int i = 0; i < a_nSubdivisions; i++)
+	{
+		// Draw the Top of the Tube
+		AddQuad(a_vTopInnerPoints[(i + 1) % a_nSubdivisions],
+			a_vTopInnerPoints[i],
+			a_vTopOuterPoints[(i + 1) % a_nSubdivisions],
+			a_vTopOuterPoints[i]);
+		// Draw the Bottom of the Tube
+		AddQuad(a_vBotInnerPoints[i],
+			a_vBotInnerPoints[(i + 1) % a_nSubdivisions],
+			a_vBotOuterPoints[i],
+			a_vBotOuterPoints[(i + 1) % a_nSubdivisions]);
+
+		// Draw the Center of the Tube on the OUTSIDE
+		AddQuad(a_vBotOuterPoints[i],
+			a_vBotOuterPoints[(i + 1) % a_nSubdivisions],
+			a_vTopOuterPoints[i],
+			a_vTopOuterPoints[(i + 1) % a_nSubdivisions]);
+		// Draw the center of the Tube on the INSIDE
+		AddQuad(a_vBotInnerPoints[(i + 1) % a_nSubdivisions],
+			a_vBotInnerPoints[i],
+			a_vTopInnerPoints[(i + 1) % a_nSubdivisions],
+			a_vTopInnerPoints[i]);
+
+	}
 	// -------------------------------
 
 	// Adding information about color
@@ -147,7 +245,7 @@ void MyMesh::GenerateTorus(float a_fOuterRadius, float a_fInnerRadius, int a_nSu
 	Init();
 
 	// Replace this with your code
-	GenerateCube(a_fOuterRadius * 2.0f, a_v3Color);
+	//GenerateCube(a_fOuterRadius * 2.0f, a_v3Color);
 	// -------------------------------
 
 	// Adding information about color
