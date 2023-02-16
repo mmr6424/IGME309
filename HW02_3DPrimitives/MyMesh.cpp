@@ -246,6 +246,39 @@ void MyMesh::GenerateTorus(float a_fOuterRadius, float a_fInnerRadius, int a_nSu
 
 	// Replace this with your code
 	//GenerateCube(a_fOuterRadius * 2.0f, a_v3Color);
+	float a_fTubeOuterRadius = (a_fOuterRadius - a_fInnerRadius) / 2;
+	float a_fTubeInnerRadius = a_fTubeOuterRadius + a_fInnerRadius;
+
+	float a_fPointIncrementA = 2 * PI / a_nSubdivisionsA;
+
+	for (uint i = 0; i < a_nSubdivisionsA; i++) {
+		float currentTorusAngle = a_fPointIncrementA * i;
+		float nextTorusAngle = a_fPointIncrementA * (i + 1);
+
+		for (uint j = 0; j < a_nSubdivisionsB; j++) {
+			float currentTubeAngle = a_fPointIncrementA * j;
+			float nextTubeAngle = a_fPointIncrementA * (j + 1);
+
+			vector3 firstTorusAngle = vector3(a_fTubeInnerRadius + a_fTubeOuterRadius * cosf(currentTubeAngle) * cosf(currentTorusAngle),
+				a_fTubeInnerRadius + a_fTubeOuterRadius * cosf(currentTubeAngle) * sinf(currentTorusAngle),
+				a_fTubeOuterRadius * sinf(currentTubeAngle));
+
+			vector3 firstTubeAngle = vector3(a_fTubeInnerRadius + a_fTubeOuterRadius * cosf(nextTubeAngle) * cosf(currentTorusAngle),
+				a_fTubeInnerRadius + a_fTubeOuterRadius * cosf(nextTubeAngle) * sinf(currentTorusAngle),
+				a_fTubeOuterRadius * sinf(nextTubeAngle));
+			
+
+			vector3 secondTorusAngle = vector3(a_fTubeInnerRadius + a_fTubeOuterRadius * cosf(currentTubeAngle) * cosf(nextTorusAngle),
+				a_fTubeInnerRadius + a_fTubeOuterRadius * cosf(currentTubeAngle) * sinf(nextTorusAngle),
+				a_fTubeOuterRadius * sinf(currentTubeAngle));
+
+			vector3 secondTubeAngle = vector3(a_fTubeInnerRadius + a_fTubeOuterRadius * cosf(nextTubeAngle) * cosf(nextTorusAngle),
+				a_fTubeInnerRadius + a_fTubeOuterRadius * cosf(nextTubeAngle) * sinf(nextTorusAngle),
+				a_fTubeOuterRadius * sinf(nextTubeAngle));
+			
+			AddQuad(secondTorusAngle, secondTubeAngle, firstTorusAngle, firstTubeAngle);
+		}
+	}
 	// -------------------------------
 
 	// Adding information about color
@@ -271,6 +304,7 @@ void MyMesh::GenerateSphere(float a_fRadius, int a_nSubdivisions, vector3 a_v3Co
 
 	// Replace this with your code
 	GenerateCube(a_fRadius * 2.0f, a_v3Color);
+	vector3 a_vTopPoints, a_vBotPoints;
 	// -------------------------------
 
 	// Adding information about color
