@@ -220,6 +220,7 @@ void MyMesh::GenerateTube(float a_fOuterRadius, float a_fInnerRadius, float a_fH
 	CompleteMesh(a_v3Color);
 	CompileOpenGL3X();
 }
+//--- Completed ---//
 void MyMesh::GenerateTorus(float a_fOuterRadius, float a_fInnerRadius, int a_nSubdivisionsA, int a_nSubdivisionsB, vector3 a_v3Color)
 {
 	if (a_fOuterRadius < 0.01f)
@@ -252,31 +253,31 @@ void MyMesh::GenerateTorus(float a_fOuterRadius, float a_fInnerRadius, int a_nSu
 	float a_fPointIncrementA = 2 * PI / a_nSubdivisionsA;
 
 	for (uint i = 0; i < a_nSubdivisionsA; i++) {
-		float currentTorusAngle = a_fPointIncrementA * i;
-		float nextTorusAngle = a_fPointIncrementA * (i + 1);
+		float a_fCurrentTorusAngle = a_fPointIncrementA * i;
+		float a_fNextTorusAngle = a_fPointIncrementA * (i + 1);
 
 		for (uint j = 0; j < a_nSubdivisionsB; j++) {
-			float currentTubeAngle = a_fPointIncrementA * j;
-			float nextTubeAngle = a_fPointIncrementA * (j + 1);
+			float a_fCurrentTubeAngle = a_fPointIncrementA * j;
+			float a_fNextTubeAngle = a_fPointIncrementA * (j + 1);
 
-			vector3 firstTorusAngle = vector3(a_fTubeInnerRadius + a_fTubeOuterRadius * cosf(currentTubeAngle) * cosf(currentTorusAngle),
-				a_fTubeInnerRadius + a_fTubeOuterRadius * cosf(currentTubeAngle) * sinf(currentTorusAngle),
-				a_fTubeOuterRadius * sinf(currentTubeAngle));
+			vector3 a_vCurrentTorus = vector3((a_fTubeInnerRadius + a_fTubeOuterRadius * cosf(a_fCurrentTubeAngle)) * cosf(a_fCurrentTorusAngle),
+				(a_fTubeInnerRadius + a_fTubeOuterRadius * cosf(a_fCurrentTubeAngle)) * sinf(a_fCurrentTorusAngle),
+				a_fTubeOuterRadius * sinf(a_fCurrentTubeAngle));
 
-			vector3 firstTubeAngle = vector3(a_fTubeInnerRadius + a_fTubeOuterRadius * cosf(nextTubeAngle) * cosf(currentTorusAngle),
-				a_fTubeInnerRadius + a_fTubeOuterRadius * cosf(nextTubeAngle) * sinf(currentTorusAngle),
-				a_fTubeOuterRadius * sinf(nextTubeAngle));
+			vector3 a_vCurrentTube = vector3((a_fTubeInnerRadius + a_fTubeOuterRadius * cosf(a_fNextTubeAngle)) * cosf(a_fCurrentTorusAngle),
+				(a_fTubeInnerRadius + a_fTubeOuterRadius * cosf(a_fNextTubeAngle)) * sinf(a_fCurrentTorusAngle),
+				a_fTubeOuterRadius * sinf(a_fNextTubeAngle));
 			
 
-			vector3 secondTorusAngle = vector3(a_fTubeInnerRadius + a_fTubeOuterRadius * cosf(currentTubeAngle) * cosf(nextTorusAngle),
-				a_fTubeInnerRadius + a_fTubeOuterRadius * cosf(currentTubeAngle) * sinf(nextTorusAngle),
-				a_fTubeOuterRadius * sinf(currentTubeAngle));
+			vector3 a_vNextTorus = vector3((a_fTubeInnerRadius + a_fTubeOuterRadius * cosf(a_fCurrentTubeAngle)) * cosf(a_fNextTorusAngle),
+				(a_fTubeInnerRadius + a_fTubeOuterRadius * cosf(a_fCurrentTubeAngle)) * sinf(a_fNextTorusAngle),
+				a_fTubeOuterRadius * sinf(a_fCurrentTubeAngle));
 
-			vector3 secondTubeAngle = vector3(a_fTubeInnerRadius + a_fTubeOuterRadius * cosf(nextTubeAngle) * cosf(nextTorusAngle),
-				a_fTubeInnerRadius + a_fTubeOuterRadius * cosf(nextTubeAngle) * sinf(nextTorusAngle),
-				a_fTubeOuterRadius * sinf(nextTubeAngle));
+			vector3 a_vNextTube = vector3((a_fTubeInnerRadius + a_fTubeOuterRadius * cosf(a_fNextTubeAngle)) * cosf(a_fNextTorusAngle),
+				(a_fTubeInnerRadius + a_fTubeOuterRadius * cosf(a_fNextTubeAngle)) * sinf(a_fNextTorusAngle),
+				a_fTubeOuterRadius * sinf(a_fNextTubeAngle));
 			
-			AddQuad(secondTorusAngle, secondTubeAngle, firstTorusAngle, firstTubeAngle);
+			AddQuad(a_vNextTorus, a_vNextTube, a_vCurrentTorus, a_vCurrentTube);
 		}
 	}
 	// -------------------------------
