@@ -286,6 +286,7 @@ void MyMesh::GenerateTorus(float a_fOuterRadius, float a_fInnerRadius, int a_nSu
 	CompleteMesh(a_v3Color);
 	CompileOpenGL3X();
 }
+//--- Completed ---//
 void MyMesh::GenerateSphere(float a_fRadius, int a_nSubdivisions, vector3 a_v3Color)
 {
 	if (a_fRadius < 0.01f)
@@ -297,6 +298,7 @@ void MyMesh::GenerateSphere(float a_fRadius, int a_nSubdivisions, vector3 a_v3Co
 		GenerateCube(a_fRadius * 2.0f, a_v3Color);
 		return;
 	}
+
 	if (a_nSubdivisions > 6)
 		a_nSubdivisions = 6;
 
@@ -304,8 +306,36 @@ void MyMesh::GenerateSphere(float a_fRadius, int a_nSubdivisions, vector3 a_v3Co
 	Init();
 
 	// Replace this with your code
-	GenerateCube(a_fRadius * 2.0f, a_v3Color);
-	vector3 a_vTopPoints, a_vBotPoints;
+	//GenerateCube(a_fRadius * 2.0f, a_v3Color);
+	vector3 a_vBottom = vector3(0, 0, -a_fRadius);
+	vector3 a_vTop = vector3(0, 0, 0);
+	std::vector<std::vector<vector3> > a_vPoints;
+
+	for (int i = 0; i < a_nSubdivisions; i++)
+	{
+		a_vPoints.push_back(std::vector<vector3>());
+		double theta = i * PI / a_nSubdivisions;
+		for (int j = -a_nSubdivisions; j < a_nSubdivisions; j++)
+		{
+			a_vPoints[i].push_back(a_vTop);
+			double phi = j * 2 * PI / a_nSubdivisions;
+			a_vPoints[i][j + a_nSubdivisions].x = a_fRadius * sin(theta) * cos(phi);
+			a_vPoints[i][j + a_nSubdivisions].y = a_fRadius * sin(theta) * sin(phi);
+			a_vPoints[i][j + a_nSubdivisions].z = a_fRadius * cos(theta);
+		}
+	}
+
+	for (uint i = 1; i < a_nSubdivisions; i++)
+	{
+		for (uint j = 0; j <= a_nSubdivisions + 1; j++)
+		{
+			AddTri(a_vPoints[i][j], a_vPoints[i][j + 1], a_vPoints[i - 1][j]);
+			AddTri(a_vPoints[i][j + 1], a_vPoints[i - 1][j + 1], a_vPoints[i - 1][j]);
+
+
+			if (i == a_nSubdivisions - 1) AddTri(a_vPoints[i][j + 1], a_vPoints[i][j], a_vBottom);
+		}
+	}
 	// -------------------------------
 
 	// Adding information about color
