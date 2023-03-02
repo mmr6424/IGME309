@@ -34,23 +34,28 @@ void Application::Display(void)
 	matrix4 m4View = m_pCameraMngr->GetViewMatrix();
 	matrix4 m4Projection = m_pCameraMngr->GetProjectionMatrix();
 
-	m_m4Model = glm::rotate(IDENTITY_M4, glm::radians(m_v3Rotation.x), vector3(1.0f, 0.0f, 0.0f));
-	m_m4Model = glm::rotate(m_m4Model, glm::radians(m_v3Rotation.y), vector3(0.0f, 1.0f, 0.0f));
-	m_m4Model = glm::rotate(m_m4Model, glm::radians(m_v3Rotation.z), vector3(0.0f, 0.0f, 1.0f));
+	/*m_m4Model = glm::rotate(IDENTITY_M4, glm::radians(m_v3Rotation.x), AXIS_X);
+	m_m4Model = glm::rotate(m_m4Model, glm::radians(m_v3Rotation.y), AXIS_Y);
+	m_m4Model = glm::rotate(m_m4Model, glm::radians(m_v3Rotation.z), AXIS_Z); */
 
-	// Still has a Gimbal Lock because it uses Euler angles
 	quaternion q1 = glm::angleAxis(glm::radians(m_v3Rotation.x), AXIS_X);
+	glm::normalize(q1);
 	quaternion q2 = glm::angleAxis(glm::radians(m_v3Rotation.y), AXIS_Y);
+	glm::normalize(q2);
 	quaternion q3 = glm::angleAxis(glm::radians(m_v3Rotation.z), AXIS_Z);
-	quaternion q4 = q1 * q2;
-	q4 = glm::cross(q4, q3);
+	glm::normalize(q3);
+	m_v3Rotation = vector3();
+
+	m_qOrientation *= q1 * q2 * q3;
+
+	m_m4Model = ToMatrix4(m_qOrientation);
+
 	// When you're rotating, you want to rotate the orientation as well
 	/*
 	* The following line was replaced by the model manager so we can see a model instead of a cone
 	*/
 	//m_pMesh->Render(m4Projection, m4View, ToMatrix4(m_m4Model));
-	m_pModelMngr->AddModelToRenderList(m_sSteve, ToMatrix4(q4));
-
+	m_pModelMngr->AddModelToRenderList(m_sSteve, ToMatrix4(m_m4Model));
 
 	// draw a skybox
 	m_pModelMngr->AddSkyboxToRenderList();
