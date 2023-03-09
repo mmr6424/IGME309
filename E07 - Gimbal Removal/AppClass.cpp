@@ -39,11 +39,8 @@ void Application::Display(void)
 	m_m4Model = glm::rotate(m_m4Model, glm::radians(m_v3Rotation.z), AXIS_Z); */
 
 	quaternion q1 = glm::angleAxis(glm::radians(m_v3Rotation.x), AXIS_X);
-	glm::normalize(q1);
 	quaternion q2 = glm::angleAxis(glm::radians(m_v3Rotation.y), AXIS_Y);
-	glm::normalize(q2);
 	quaternion q3 = glm::angleAxis(glm::radians(m_v3Rotation.z), AXIS_Z);
-	glm::normalize(q3);
 	m_v3Rotation = vector3();
 
 	m_qOrientation *= q1 * q2 * q3;
