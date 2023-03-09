@@ -21,16 +21,25 @@ void MyCamera::MoveForward(float a_fDistance)
 	//		 in the _Binary folder you will notice that we are moving 
 	//		 backwards and we never get closer to the plane as we should 
 	//		 because as we are looking directly at it.
-	m_v3Position += vector3(0.0f, 0.0f, a_fDistance);
-	m_v3Target += vector3(0.0f, 0.0f, a_fDistance);
+	m_v3Position -= vector3(0.0f, 0.0f, a_fDistance);
+	m_v3Target -= vector3(0.0f, 0.0f, a_fDistance);
+
+	/*// Rotating a vector around a quat
+	quaternion q1 = glm::angleAxis(glm::radians(90.0f), AXIS_Y);
+	vector3 v1(1.0f, 0.0f, 0.0f);
+	vector3 v2 = glm::rotate(q1, v1); */
 }
 void MyCamera::MoveVertical(float a_fDistance)
 {
 	//Tip:: Look at MoveForward
+	m_v3Position += vector3(0.0f, a_fDistance, 0.0f);
+	m_v3Target += vector3(0.0f, a_fDistance, 0.0f);
 }
 void MyCamera::MoveSideways(float a_fDistance)
 {
 	//Tip:: Look at MoveForward
+	m_v3Position += vector3(a_fDistance, 0.0f, 0.0f);
+	m_v3Target += vector3(a_fDistance, 0.0f, 0.0f);
 }
 void MyCamera::CalculateView(void)
 {
