@@ -3,9 +3,15 @@ using namespace BTX;
 //Accessors
 void MyCamera::SetPosition(vector3 a_v3Position) { m_v3Position = a_v3Position; }
 
+vector3 MyCamera::GetPosition() { return m_v3Position; }
+
 void MyCamera::SetTarget(vector3 a_v3Target) { m_v3Target = a_v3Target; }
 
+vector3 MyCamera::GetTarget() { return m_v3Target; }
+
 void MyCamera::SetUp(vector3 a_v3Up) { m_v3Up = a_v3Up; }
+
+vector3 MyCamera::GetUp() { return m_v3Up; }
 
 void MyCamera::SetPerspective(bool a_bPerspective) { m_bPerspective = a_bPerspective; }
 

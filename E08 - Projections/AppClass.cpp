@@ -2,7 +2,7 @@
 void Application::InitVariables(void)
 {
 	////Change this to your name and email
-	m_sProgrammer = "Alberto Bobadilla - labigm@rit.edu";
+	m_sProgrammer = "Rose Rushton - mmr6424@rit.edu";
 	vector3 v3Position(0.0f, 0.0f, 10.0f);
 	vector3 v3Target = ZERO_V3;
 	vector3 v3Upward = AXIS_Y;
@@ -59,21 +59,35 @@ void Application::Display(void)
 		break;
 	case 2:
 		m_pCamera->ResetCamera();
+		m_pCamera->SetPerspective(false);
 		break;
 	case 3:
-		m_pCamera->ResetCamera();
+		if (m_pCamera->GetPosition() != (AXIS_Z * 30.0f) || m_pCamera->GetUp() != (AXIS_Z * -1.0f)) {
+			m_pCamera->ResetCamera();
+			m_pCamera->SetPositionTargetAndUpward(AXIS_X * 30.0f, m_pCamera->GetTarget(), AXIS_Z * -1.0f);
+		}
 		break;
 	case 4:
-		m_pCamera->ResetCamera();
+		if (m_pCamera->GetPosition() != (AXIS_Z * -13.0f) || m_pCamera->GetUp() != AXIS_Y) {
+			m_pCamera->ResetCamera();
+			m_pCamera->SetPositionTargetAndUpward(AXIS_Z * -13.0f, m_pCamera->GetTarget(), AXIS_Y);
+		}
 		break;
 	case 5:
 		m_pCamera->ResetCamera();
+		m_pCamera->SetPosition(AXIS_Z * -13.0f);
+		m_pCamera->SetNearFar(vector2(6.0f, 13.0f));
 		break;
 	case 6:
 		m_pCamera->ResetCamera();
+		m_pCamera->SetPosition(AXIS_Z * -13.0f);
+		m_pCamera->SetNearFar(vector2(1.0f, 8.0f));
 		break;
 	case 7:
-		m_pCamera->ResetCamera();
+		if (m_pCamera->GetPosition() != vector3(0.0f, 0.0f, 10.0f) || m_pCamera->GetUp() != (AXIS_Y * -1.0f)) {
+			m_pCamera->ResetCamera();
+			m_pCamera->SetUp(AXIS_Y * -1.0f);
+		}
 		break;
 	}
 
