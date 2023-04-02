@@ -40,6 +40,7 @@ void MyCamera::MoveVertical(float a_fDistance)
 	m_v3Upward = glm::cross(m_v3Rightward, m_v3Forward);
 	m_v3Position += m_v3Upward * a_fDistance;
 	m_v3Target += m_v3Upward * a_fDistance;
+	CalculateView();
 }
 void MyCamera::MoveSideways(float a_fDistance)
 {
@@ -47,6 +48,7 @@ void MyCamera::MoveSideways(float a_fDistance)
 	m_v3Rightward = glm::cross(m_v3Forward, vector3(0, 1, 0));
 	m_v3Position += m_v3Rightward * a_fDistance;
 	m_v3Target += m_v3Rightward * a_fDistance;
+	CalculateView();
 }
 void MyCamera::CalculateView(void)
 {
@@ -56,6 +58,17 @@ void MyCamera::CalculateView(void)
 	//		 it will receive information from the main code on how much these orientations
 	//		 have change so you only need to focus on the directional and positional 
 	//		 vectors. There is no need to calculate any right click process or connections.
+	float yaw = glm::radians(m_v3PitchYawRoll.y);
+	float pitch = glm::radians(m_v3PitchYawRoll.x);
+	float roll = glm::radians(m_v3PitchYawRoll.z);
+	m_v3PitchYawRoll = vector3(0.0f);
+	vector3 a_v3Temp = m_v3Target;
+	if (pitch != 0 && yaw != 0) {
+		a_v3Temp.x = cos(yaw) * cos(pitch);
+		a_v3Temp.y = sin(yaw) * cos(pitch);
+		a_v3Temp.z = sin(pitch);
+	}
+	m_v3Target = a_v3Temp;
 	m_m4View = glm::lookAt(m_v3Position, m_v3Target, m_v3Upward);
 
 }
