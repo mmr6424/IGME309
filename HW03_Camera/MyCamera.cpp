@@ -31,11 +31,6 @@ void MyCamera::MoveForward(float a_fDistance)
 	// Move the target forward
 	m_v3Target += m_v3Forward * a_fDistance;
 	CalculateView();
-
-	/*// Rotating a vector around a quat
-	quaternion q1 = glm::angleAxis(glm::radians(90.0f), AXIS_Y);
-	vector3 v1(1.0f, 0.0f, 0.0f);
-	vector3 v2 = glm::rotate(q1, v1); */
 }
 void MyCamera::MoveVertical(float a_fDistance)
 {
@@ -67,29 +62,24 @@ void MyCamera::CalculateView(void)
 	//		 it will receive information from the main code on how much these orientations
 	//		 have change so you only need to focus on the directional and positional 
 	//		 vectors. There is no need to calculate any right click process or connections.
+	// Grab the yaw pitch and roll
 	float yaw = m_v3PitchYawRoll.y;
 	float pitch = m_v3PitchYawRoll.x;
-	float roll = m_v3PitchYawRoll.z;
-	m_v3PitchYawRoll = vector3(0.0f);
+	float roll = m_v3PitchYawRoll.z; // LEAVE CODE IN FOR FUTURE USE
+	// Reset roll because we're not using it, but might later so
+	roll = 0.0f;
 
-	//apply yaw(around y)
-	m_v3Target.x = m_v3Target.x * cos(yaw) - m_v3Target.z * sin(yaw);
-	m_v3Target.z = m_v3Target.z * cos(yaw) + m_v3Target.x * sin(yaw);
+	// Grab the angle-axis
+	glm::quat q1 = glm::angleAxis(pitch, AXIS_X);
+	glm::quat q2 = glm::angleAxis(yaw, m_v3Upward);
+	glm::quat q3 = glm::angleAxis(roll, AXIS_Z);
 
-	//apply pitch(around x)
-	m_v3Target.y = m_v3Target.y * cos(roll) - m_v3Target.z * sin(roll);
-	m_v3Target.z = m_v3Target.z * cos(roll) + m_v3Target.y * sin(roll);
-
-	//apply roll(around z)
-	m_v3Target.x = m_v3Target.x * cos(pitch) - m_v3Target.y * sin(pitch);
-	m_v3Target.y = m_v3Target.y * cos(pitch) + m_v3Target.x * sin(pitch);
-
-	m_v3Forward = glm::normalize(m_v3Target - m_v3Position);
-	m_v3Upward = glm::cross(m_v3Rightward, m_v3Forward);
-	m_v3Rightward = glm::cross(m_v3Forward, vector3(0, 1, 0));
-
-	m_m4View = glm::lookAt(m_v3Position, m_v3Target, m_v3Upward);
-
+	// Make the orientation
+	glm::quat a_qOrientation = q1 * q2 * q3;
+	
+	// Look at the proper location, and multiply it by the Orientation
+	// There's a littly funkiness with this but I cannot figure out why
+	m_m4View = glm::lookAt(m_v3Position, m_v3Target, m_v3Upward) * ToMatrix4(a_qOrientation);
 }
 //You can assume that the code below does not need changes unless you expand the functionality
 //of the class or create helper methods, etc.
