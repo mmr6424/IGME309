@@ -24,8 +24,11 @@ void MyCamera::MoveForward(float a_fDistance)
 	//		 in the _Binary folder you will notice that we are moving 
 	//		 backwards and we never get closer to the plane as we should 
 	//		 because as we are looking directly at it.
+	// Set the direction the camera is facing
 	m_v3Forward = glm::normalize(m_v3Target - m_v3Position);
+	// Move it in that direction by the distance
 	m_v3Position += m_v3Forward * a_fDistance;
+	// Move the target forward
 	m_v3Target += m_v3Forward * a_fDistance;
 	CalculateView();
 
@@ -37,16 +40,22 @@ void MyCamera::MoveForward(float a_fDistance)
 void MyCamera::MoveVertical(float a_fDistance)
 {
 	//Tip:: Look at MoveForward
+	// Set the Upward to the local up
 	m_v3Upward = glm::cross(m_v3Rightward, m_v3Forward);
+	// Move the camera upward locally
 	m_v3Position += m_v3Upward * a_fDistance;
+	// Move the target upward as well
 	m_v3Target += m_v3Upward * a_fDistance;
 	CalculateView();
 }
 void MyCamera::MoveSideways(float a_fDistance)
 {
 	//Tip:: Look at MoveForward
+	// Set the Rightward to the local right
 	m_v3Rightward = glm::cross(m_v3Forward, vector3(0, 1, 0));
+	// Move the position rightward
 	m_v3Position += m_v3Rightward * a_fDistance;
+	// Move the target as well
 	m_v3Target += m_v3Rightward * a_fDistance;
 	CalculateView();
 }
@@ -58,17 +67,27 @@ void MyCamera::CalculateView(void)
 	//		 it will receive information from the main code on how much these orientations
 	//		 have change so you only need to focus on the directional and positional 
 	//		 vectors. There is no need to calculate any right click process or connections.
-	float yaw = glm::radians(m_v3PitchYawRoll.y);
-	float pitch = glm::radians(m_v3PitchYawRoll.x);
-	float roll = glm::radians(m_v3PitchYawRoll.z);
+	float yaw = m_v3PitchYawRoll.y;
+	float pitch = m_v3PitchYawRoll.x;
+	float roll = m_v3PitchYawRoll.z;
 	m_v3PitchYawRoll = vector3(0.0f);
-	vector3 a_v3Temp = m_v3Target;
-	if (pitch != 0 && yaw != 0) {
-		a_v3Temp.x = cos(yaw) * cos(pitch);
-		a_v3Temp.y = sin(yaw) * cos(pitch);
-		a_v3Temp.z = sin(pitch);
-	}
-	m_v3Target = a_v3Temp;
+
+	//apply yaw(around y)
+	m_v3Target.x = m_v3Target.x * cos(yaw) - m_v3Target.z * sin(yaw);
+	m_v3Target.z = m_v3Target.z * cos(yaw) + m_v3Target.x * sin(yaw);
+
+	//apply pitch(around x)
+	m_v3Target.y = m_v3Target.y * cos(roll) - m_v3Target.z * sin(roll);
+	m_v3Target.z = m_v3Target.z * cos(roll) + m_v3Target.y * sin(roll);
+
+	//apply roll(around z)
+	m_v3Target.x = m_v3Target.x * cos(pitch) - m_v3Target.y * sin(pitch);
+	m_v3Target.y = m_v3Target.y * cos(pitch) + m_v3Target.x * sin(pitch);
+
+	m_v3Forward = glm::normalize(m_v3Target - m_v3Position);
+	m_v3Upward = glm::cross(m_v3Rightward, m_v3Forward);
+	m_v3Rightward = glm::cross(m_v3Forward, vector3(0, 1, 0));
+
 	m_m4View = glm::lookAt(m_v3Position, m_v3Target, m_v3Upward);
 
 }
