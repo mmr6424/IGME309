@@ -6,14 +6,14 @@ uint MyRigidBody::SAT(MyRigidBody* const a_pOther)
 	//TODO: Calculate the SAT algorithm I STRONGLY suggest you use the
 	//Real Time Collision detection algorithm for OBB here but feel free to
 	//implement your own solution.
-	return BTXs::eSATResults::SAT_NONE;
+	//return BTXs::eSATResults::SAT_NONE;
 
 	float fThis, fOther;
 
 	glm::mat3x3 m3Rot, m3AbsRot;
 	
-	std::vector<vector3> u;
-	std::vector<vector3> otherU;
+	std::vector<vector3> u = std::vector<vector3>(3);
+	std::vector<vector3> otherU = std::vector<vector3>(3);
 
 	u[0] = vector3(m_m4ToWorld[0][0], m_m4ToWorld[0][1], m_m4ToWorld[0][2]);
 	u[1] = vector3(m_m4ToWorld[1][0], m_m4ToWorld[1][1], m_m4ToWorld[1][2]);
@@ -30,7 +30,7 @@ uint MyRigidBody::SAT(MyRigidBody* const a_pOther)
 			m3Rot[i][j] = glm::dot(u[i], otherU[j]);
 		}
 	}
-	vector3 v3Translation = a_pOther->m_v3HalfWidth - m_v3HalfWidth;
+	vector3 v3Translation = a_pOther->m_v3Center - m_v3Center;
 	// Bring translation into this object's local space
 	v3Translation = vector3(glm::dot(v3Translation, u[0]), glm::dot(v3Translation, u[1]), glm::dot(v3Translation, u[2]));
 
@@ -87,7 +87,7 @@ uint MyRigidBody::SAT(MyRigidBody* const a_pOther)
 
 	// Test axis L = A2 x B0
 	fThis = m_v3HalfWidth[0] * m3AbsRot[1][0] + m_v3HalfWidth[1] * m3AbsRot[0][0];
-	fOther = a_pOther->m_v3HalfWidth[0] * m3AbsRot[2][2] + a_pOther->m_v3HalfWidth[2] * m3AbsRot[2][1];
+	fOther = a_pOther->m_v3HalfWidth[1] * m3AbsRot[2][2] + a_pOther->m_v3HalfWidth[2] * m3AbsRot[2][1];
 	if (glm::abs(v3Translation[1] * m3Rot[0][0] - v3Translation[0] * m3Rot[1][0]) > fThis + fOther) return 0;
 
 	// Test axis L = A2 x B1
@@ -116,7 +116,7 @@ bool MyRigidBody::IsColliding(MyRigidBody* const a_pOther)
 	{
 		uint nResult = SAT(a_pOther);
 
-		if (bColliding) //The SAT shown they are colliding
+		if (nResult == 1) //The SAT shown they are colliding
 		{
 			this->AddCollisionWith(a_pOther);
 			a_pOther->AddCollisionWith(this);
