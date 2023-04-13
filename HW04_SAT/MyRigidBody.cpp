@@ -48,6 +48,60 @@ uint MyRigidBody::SAT(MyRigidBody* const a_pOther)
 		if (glm::abs(v3Translation[i]) > fThis + fOther) return 0;
 	}
 
+	// Test axes L = B0, L = B1, L = B2
+	for (uint i = 0; i < 3; i++) {
+		fThis = m_v3HalfWidth[0] * m3AbsRot[0][i] + m_v3HalfWidth[1] * m3AbsRot[1][i] + m_v3HalfWidth[2] * m3AbsRot[2][i];
+		fOther = a_pOther->m_v3HalfWidth[i];
+		if (glm::abs(v3Translation[0] * m3Rot[0][i] + v3Translation[1] * m3Rot[1][i] + v3Translation[2] * m3Rot[2][i]) > fThis + fOther) return 0;
+	}
+
+	// Test axis L = A0 x B0
+	fThis = m_v3HalfWidth[1] * m3AbsRot[2][0] + m_v3HalfWidth[2] * m3AbsRot[1][0];
+	fOther = a_pOther->m_v3HalfWidth[1] * m3AbsRot[0][2] + a_pOther->m_v3HalfWidth[2] * m3AbsRot[0][1];
+	if (glm::abs(v3Translation[2] * m3Rot[1][0] - v3Translation[1] * m3Rot[2][0]) > fThis + fOther) return 0;
+
+	// Test axis L = A0 x B1
+	fThis = m_v3HalfWidth[1] * m3AbsRot[2][1] + m_v3HalfWidth[2] * m3AbsRot[1][1];
+	fOther = a_pOther->m_v3HalfWidth[0] * m3AbsRot[0][2] + a_pOther->m_v3HalfWidth[2] * m3AbsRot[0][0];
+	if (glm::abs(v3Translation[2] * m3Rot[1][1] - v3Translation[1] * m3Rot[2][1]) > fThis + fOther) return 0;
+
+	// Test axis L = A0 x B2
+	fThis = m_v3HalfWidth[1] * m3AbsRot[2][2] + m_v3HalfWidth[2] * m3AbsRot[1][2];
+	fOther = a_pOther->m_v3HalfWidth[0] * m3AbsRot[0][1] + a_pOther->m_v3HalfWidth[1] * m3AbsRot[0][0];
+	if (glm::abs(v3Translation[2] * m3Rot[1][2] - v3Translation[1] * m3Rot[2][2]) > fThis + fOther) return 0;
+
+	// Test axis L = A1 x B0
+	fThis = m_v3HalfWidth[0] * m3AbsRot[2][0] + m_v3HalfWidth[2] * m3AbsRot[0][0];
+	fOther = a_pOther->m_v3HalfWidth[1] * m3AbsRot[1][2] + a_pOther->m_v3HalfWidth[2] * m3AbsRot[1][1];
+	if (glm::abs(v3Translation[0] * m3Rot[2][0] - v3Translation[2] * m3Rot[0][0]) > fThis + fOther) return 0;
+
+	// Test axis L = A1 x B1
+	fThis = m_v3HalfWidth[0] * m3AbsRot[2][1] + m_v3HalfWidth[2] * m3AbsRot[0][1];
+	fOther = a_pOther->m_v3HalfWidth[0] * m3AbsRot[1][2] + a_pOther->m_v3HalfWidth[2] * m3AbsRot[1][0];
+	if (glm::abs(v3Translation[0] * m3Rot[2][1] - v3Translation[2] * m3Rot[0][1]) > fThis + fOther) return 0;
+
+	// Test axis L = A1 x B2
+	fThis = m_v3HalfWidth[0] * m3AbsRot[2][2] + m_v3HalfWidth[2] * m3AbsRot[0][2];
+	fOther = a_pOther->m_v3HalfWidth[0] * m3AbsRot[1][1] + a_pOther->m_v3HalfWidth[1] * m3AbsRot[1][0];
+	if (glm::abs(v3Translation[0] * m3Rot[2][2] - v3Translation[2] * m3Rot[0][2]) > fThis + fOther) return 0;
+
+	// Test axis L = A2 x B0
+	fThis = m_v3HalfWidth[0] * m3AbsRot[1][0] + m_v3HalfWidth[1] * m3AbsRot[0][0];
+	fOther = a_pOther->m_v3HalfWidth[0] * m3AbsRot[2][2] + a_pOther->m_v3HalfWidth[2] * m3AbsRot[2][1];
+	if (glm::abs(v3Translation[1] * m3Rot[0][0] - v3Translation[0] * m3Rot[1][0]) > fThis + fOther) return 0;
+
+	// Test axis L = A2 x B1
+	fThis = m_v3HalfWidth[0] * m3AbsRot[1][1] + m_v3HalfWidth[1] * m3AbsRot[0][1];
+	fOther = a_pOther->m_v3HalfWidth[0] * m3AbsRot[2][2] + a_pOther->m_v3HalfWidth[2] * m3AbsRot[2][0];
+	if (glm::abs(v3Translation[1] * m3Rot[0][1] - v3Translation[0] * m3Rot[1][1]) > fThis + fOther) return 0;
+
+	// Test axis L = A2 x B2
+	fThis = m_v3HalfWidth[0] * m3AbsRot[1][2] + m_v3HalfWidth[1] * m3AbsRot[0][2];
+	fOther = a_pOther->m_v3HalfWidth[0] * m3AbsRot[2][1] + a_pOther->m_v3HalfWidth[1] * m3AbsRot[2][0];
+	if (glm::abs(v3Translation[1] * m3Rot[0][2] - v3Translation[0] * m3Rot[1][2]) > fThis + fOther) return 0;
+
+	// Since no separating axis is found, OBBs must be intersecting
+	return 1;
 }
 bool MyRigidBody::IsColliding(MyRigidBody* const a_pOther)
 {
