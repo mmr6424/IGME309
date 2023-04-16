@@ -8,100 +8,102 @@ uint MyRigidBody::SAT(MyRigidBody* const a_pOther)
 	//implement your own solution.
 	//return BTXs::eSATResults::SAT_NONE;
 
-	float fThis, fOther;
+	// Radii
+	float fA, fB;
 
-	glm::mat3x3 m3Rot, m3AbsRot;
-	
-	std::vector<vector3> u = std::vector<vector3>(3);
-	std::vector<vector3> otherU = std::vector<vector3>(3);
+	// Rotation 3x3 Matrices
+	glm::mat3x3 m3RotA, m3RotB;
 
-	u[0] = vector3(m_m4ToWorld[0][0], m_m4ToWorld[0][1], m_m4ToWorld[0][2]);
-	u[1] = vector3(m_m4ToWorld[1][0], m_m4ToWorld[1][1], m_m4ToWorld[1][2]);
-	u[2] = vector3(m_m4ToWorld[2][0], m_m4ToWorld[2][1], m_m4ToWorld[2][2]);
+	// Vectors for centers and halves
+	vector3 ac, bc, ae, be;
+	ac = GetCenterGlobal();
+	bc = a_pOther->GetCenterGlobal();
 
-	otherU[0] = vector3(a_pOther->m_m4ToWorld[0][0], a_pOther->m_m4ToWorld[0][1], a_pOther->m_m4ToWorld[0][2]);
-	otherU[1] = vector3(a_pOther->m_m4ToWorld[1][0], a_pOther->m_m4ToWorld[1][1], a_pOther->m_m4ToWorld[1][2]);
-	otherU[2] = vector3(a_pOther->m_m4ToWorld[2][0], a_pOther->m_m4ToWorld[2][1], a_pOther->m_m4ToWorld[2][2]);
+	ae = GetHalfWidth();
+	be = a_pOther->GetHalfWidth();
 
-
-	// Compute Rotation matrix expressing other in this's coordinate frame
+	// Compute Rotation matrix expressing other in this coordinate frame
 	for (uint i = 0; i < 3; i++) {
 		for (uint j = 0; j < 3; j++) {
-			m3Rot[i][j] = glm::dot(u[i], otherU[j]);
+			m3RotA[i][j] = glm::dot(this->m_m4ToWorld[i], a_pOther->m_m4ToWorld[j]);
 		}
 	}
-	vector3 v3Translation = a_pOther->m_v3Center - m_v3Center;
+	vector3 v3Translation = bc - ac;
 	// Bring translation into this object's local space
-	v3Translation = vector3(glm::dot(v3Translation, u[0]), glm::dot(v3Translation, u[1]), glm::dot(v3Translation, u[2]));
+	v3Translation = vector3(glm::dot(v3Translation, glm::vec3(this->m_m4ToWorld[0])), glm::dot(v3Translation, glm::vec3(this->m_m4ToWorld[1])), glm::dot(v3Translation, glm::vec3(this->m_m4ToWorld[2])));
 
 	// Compute common subexpressions
 	for (uint i = 0; i < 3; i++) {
 		for (uint j = 0; j < 3; j++) {
-			m3AbsRot[i][j] = glm::abs(m3Rot[i][j]) + glm::epsilon<float>();
+			m3RotB[i][j] = glm::abs(m3RotA[i][j]) + DBL_EPSILON;
 		}
 	}
 
 	// Test axes L = A0, L = A1, L = A2
 	for (uint i = 0; i < 3; i++) {
-		fThis = m_v3HalfWidth[i];
-		fOther = a_pOther->m_v3HalfWidth[0] * m3AbsRot[i][0] + a_pOther->m_v3HalfWidth[1] * m3AbsRot[i][1] + a_pOther->m_v3HalfWidth[2] * m3AbsRot[i][2];
-		if (glm::abs(v3Translation[i]) > fThis + fOther) return 0;
+		fA = ae[i];
+		fB = be[0] * m3RotB[i][0] + be[1] * m3RotB[i][1] + be[2] * m3RotB[i][2];
+		if (glm::abs(v3Translation[i]) > fA + fB) {
+			return i + 1;
+		}
 	}
 
 	// Test axes L = B0, L = B1, L = B2
 	for (uint i = 0; i < 3; i++) {
-		fThis = m_v3HalfWidth[0] * m3AbsRot[0][i] + m_v3HalfWidth[1] * m3AbsRot[1][i] + m_v3HalfWidth[2] * m3AbsRot[2][i];
-		fOther = a_pOther->m_v3HalfWidth[i];
-		if (glm::abs(v3Translation[0] * m3Rot[0][i] + v3Translation[1] * m3Rot[1][i] + v3Translation[2] * m3Rot[2][i]) > fThis + fOther) return 0;
+		fA =ae[0] * m3RotB[0][i] + ae[1] * m3RotB[1][i] + ae[2] * m3RotB[2][i];
+		fB = be[i];
+		if (glm::abs(v3Translation[0] * m3RotA[0][i] + v3Translation[1] * m3RotA[1][i] + v3Translation[2] * m3RotA[2][i]) > fA + fB) {
+			return i + 4;
+		}
 	}
 
 	// Test axis L = A0 x B0
-	fThis = m_v3HalfWidth[1] * m3AbsRot[2][0] + m_v3HalfWidth[2] * m3AbsRot[1][0];
-	fOther = a_pOther->m_v3HalfWidth[1] * m3AbsRot[0][2] + a_pOther->m_v3HalfWidth[2] * m3AbsRot[0][1];
-	if (glm::abs(v3Translation[2] * m3Rot[1][0] - v3Translation[1] * m3Rot[2][0]) > fThis + fOther) return 0;
+	fA = ae[1] * m3RotB[2][0] + ae[2] * m3RotB[1][0];
+	fB = be[1] * m3RotB[0][2] + be[2] * m3RotB[0][1];
+	if (glm::abs(v3Translation[2] * m3RotA[1][0] - v3Translation[1] * m3RotA[2][0]) > fA + fB) return BTXs::eSATResults::SAT_AXxBX;
 
 	// Test axis L = A0 x B1
-	fThis = m_v3HalfWidth[1] * m3AbsRot[2][1] + m_v3HalfWidth[2] * m3AbsRot[1][1];
-	fOther = a_pOther->m_v3HalfWidth[0] * m3AbsRot[0][2] + a_pOther->m_v3HalfWidth[2] * m3AbsRot[0][0];
-	if (glm::abs(v3Translation[2] * m3Rot[1][1] - v3Translation[1] * m3Rot[2][1]) > fThis + fOther) return 0;
+	fA = ae[1] * m3RotB[2][1] + ae[2] * m3RotB[1][1];
+	fB = be[0] * m3RotB[0][2] + be[2] * m3RotB[0][0];
+	if (glm::abs(v3Translation[2] * m3RotA[1][1] - v3Translation[1] * m3RotA[2][1]) > fA + fB) return BTXs::eSATResults::SAT_AXxBY;
 
 	// Test axis L = A0 x B2
-	fThis = m_v3HalfWidth[1] * m3AbsRot[2][2] + m_v3HalfWidth[2] * m3AbsRot[1][2];
-	fOther = a_pOther->m_v3HalfWidth[0] * m3AbsRot[0][1] + a_pOther->m_v3HalfWidth[1] * m3AbsRot[0][0];
-	if (glm::abs(v3Translation[2] * m3Rot[1][2] - v3Translation[1] * m3Rot[2][2]) > fThis + fOther) return 0;
+	fA = ae[1] * m3RotB[2][2] + ae[2] * m3RotB[1][2];
+	fB = be[0] * m3RotB[0][1] + be[1] * m3RotB[0][0];
+	if (glm::abs(v3Translation[2] * m3RotA[1][2] - v3Translation[1] * m3RotA[2][2]) > fA + fB) return BTXs::eSATResults::SAT_AXxBZ;
 
 	// Test axis L = A1 x B0
-	fThis = m_v3HalfWidth[0] * m3AbsRot[2][0] + m_v3HalfWidth[2] * m3AbsRot[0][0];
-	fOther = a_pOther->m_v3HalfWidth[1] * m3AbsRot[1][2] + a_pOther->m_v3HalfWidth[2] * m3AbsRot[1][1];
-	if (glm::abs(v3Translation[0] * m3Rot[2][0] - v3Translation[2] * m3Rot[0][0]) > fThis + fOther) return 0;
+	fA = ae[0] * m3RotB[2][0] + ae[2] * m3RotB[0][0];
+	fB = be[1] * m3RotB[1][2] + be[2] * m3RotB[1][1];
+	if (glm::abs(v3Translation[0] * m3RotA[2][0] - v3Translation[2] * m3RotA[0][0]) > fA + fB) return BTXs::eSATResults::SAT_AYxBX;
 
 	// Test axis L = A1 x B1
-	fThis = m_v3HalfWidth[0] * m3AbsRot[2][1] + m_v3HalfWidth[2] * m3AbsRot[0][1];
-	fOther = a_pOther->m_v3HalfWidth[0] * m3AbsRot[1][2] + a_pOther->m_v3HalfWidth[2] * m3AbsRot[1][0];
-	if (glm::abs(v3Translation[0] * m3Rot[2][1] - v3Translation[2] * m3Rot[0][1]) > fThis + fOther) return 0;
+	fA = ae[0] * m3RotB[2][1] + ae[2] * m3RotB[0][1];
+	fB = be[0] * m3RotB[1][2] + be[2] * m3RotB[1][0];
+	if (glm::abs(v3Translation[0] * m3RotA[2][1] - v3Translation[2] * m3RotA[0][1]) > fA + fB) return BTXs::eSATResults::SAT_AYxBY;
 
 	// Test axis L = A1 x B2
-	fThis = m_v3HalfWidth[0] * m3AbsRot[2][2] + m_v3HalfWidth[2] * m3AbsRot[0][2];
-	fOther = a_pOther->m_v3HalfWidth[0] * m3AbsRot[1][1] + a_pOther->m_v3HalfWidth[1] * m3AbsRot[1][0];
-	if (glm::abs(v3Translation[0] * m3Rot[2][2] - v3Translation[2] * m3Rot[0][2]) > fThis + fOther) return 0;
+	fA = ae[0] * m3RotB[2][2] + ae[2] * m3RotB[0][2];
+	fB = be[0] * m3RotB[1][1] + be[1] * m3RotB[1][0];
+	if (glm::abs(v3Translation[0] * m3RotA[2][2] - v3Translation[2] * m3RotA[0][2]) > fA + fB) return BTXs::eSATResults::SAT_AYxBZ;
 
 	// Test axis L = A2 x B0
-	fThis = m_v3HalfWidth[0] * m3AbsRot[1][0] + m_v3HalfWidth[1] * m3AbsRot[0][0];
-	fOther = a_pOther->m_v3HalfWidth[1] * m3AbsRot[2][2] + a_pOther->m_v3HalfWidth[2] * m3AbsRot[2][1];
-	if (glm::abs(v3Translation[1] * m3Rot[0][0] - v3Translation[0] * m3Rot[1][0]) > fThis + fOther) return 0;
+	fA = ae[0] * m3RotB[1][0] + ae[1] * m3RotB[0][0];
+	fB = be[1] * m3RotB[2][2] + be[2] * m3RotB[2][1];
+	if (glm::abs(v3Translation[1] * m3RotA[0][0] - v3Translation[0] * m3RotA[1][0]) > fA + fB) return BTXs::eSATResults::SAT_AZxBX;
 
 	// Test axis L = A2 x B1
-	fThis = m_v3HalfWidth[0] * m3AbsRot[1][1] + m_v3HalfWidth[1] * m3AbsRot[0][1];
-	fOther = a_pOther->m_v3HalfWidth[0] * m3AbsRot[2][2] + a_pOther->m_v3HalfWidth[2] * m3AbsRot[2][0];
-	if (glm::abs(v3Translation[1] * m3Rot[0][1] - v3Translation[0] * m3Rot[1][1]) > fThis + fOther) return 0;
+	fA = ae[0] * m3RotB[1][1] + ae[1] * m3RotB[0][1];
+	fB = be[0] * m3RotB[2][2] + be[2] * m3RotB[2][0];
+	if (glm::abs(v3Translation[1] * m3RotA[0][1] - v3Translation[0] * m3RotA[1][1]) > fA + fB) return BTXs::eSATResults::SAT_AZxBY;
 
 	// Test axis L = A2 x B2
-	fThis = m_v3HalfWidth[0] * m3AbsRot[1][2] + m_v3HalfWidth[1] * m3AbsRot[0][2];
-	fOther = a_pOther->m_v3HalfWidth[0] * m3AbsRot[2][1] + a_pOther->m_v3HalfWidth[1] * m3AbsRot[2][0];
-	if (glm::abs(v3Translation[1] * m3Rot[0][2] - v3Translation[0] * m3Rot[1][2]) > fThis + fOther) return 0;
+	fA = ae[0] * m3RotB[1][2] + ae[1] * m3RotB[0][2];
+	fB = be[0] * m3RotB[2][1] + be[1] * m3RotB[2][0];
+	if (glm::abs(v3Translation[1] * m3RotA[0][2] - v3Translation[0] * m3RotA[1][2]) > fA + fB) return BTXs::eSATResults::SAT_AZxBZ;
 
 	// Since no separating axis is found, OBBs must be intersecting
-	return 1;
+	return BTXs::eSATResults::SAT_NONE;
 }
 bool MyRigidBody::IsColliding(MyRigidBody* const a_pOther)
 {
@@ -116,12 +118,12 @@ bool MyRigidBody::IsColliding(MyRigidBody* const a_pOther)
 	{
 		uint nResult = SAT(a_pOther);
 
-		if (nResult == 1) //The SAT shown they are colliding
+		if (nResult == BTXs::eSATResults::SAT_NONE) //The SAT shown they are not colliding
 		{
 			this->AddCollisionWith(a_pOther);
 			a_pOther->AddCollisionWith(this);
 		}
-		else //they are not colliding
+		else //they are colliding
 		{
 			this->RemoveCollisionWith(a_pOther);
 			a_pOther->RemoveCollisionWith(this);
