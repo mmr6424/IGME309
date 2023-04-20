@@ -136,6 +136,27 @@ bool MyRigidBody::IsColliding(MyRigidBody* const a_pOther)
 		{
 			this->RemoveCollisionWith(a_pOther);
 			a_pOther->RemoveCollisionWith(this);
+
+			vector3 v3Center = (this->GetCenterGlobal() + a_pOther->GetCenterGlobal()) / 2.0f;
+			matrix4 m4Space = glm::translate(IDENTITY_M4, v3Center);
+			matrix4 m4Rotation;
+			matrix4 m4Scale = glm::scale(vector3(3.0f));
+
+			switch (nResult) {
+				case BTXs::eSATResults::SAT_AX:
+					m4Rotation = glm::rotate(IDENTITY_M4, glm::radians(90.0f), AXIS_Y);
+				break;
+				case BTXs::eSATResults::SAT_AY:
+					m4Rotation = glm::rotate(IDENTITY_M4, glm::radians(90.0f), AXIS_X);
+				break;
+				case BTXs::eSATResults::SAT_AZ:
+					m4Rotation = glm::rotate(IDENTITY_M4, glm::radians(90.0f), AXIS_Z);
+				break;
+
+			}
+
+			m_pModelMngr->AddPlaneToRenderList(m4Space * m4Rotation * m4Scale, C_PURPLE);
+			m_pModelMngr->AddPlaneToRenderList(m4Space * m4Rotation * m4Scale * glm::rotate(IDENTITY_M4, glm::radians(180.0f), AXIS_Y), C_PURPLE);
 		}
 	}
 	else //they are not colliding with bounding sphere
