@@ -15,6 +15,15 @@ uint MyRigidBody::SAT(MyRigidBody* const a_pOther)
 	glm::mat3x3 m3RotA, m3RotB;
 
 	// Vectors for centers and halves
+	vector3 au[3];
+	au[0] = m_m4ToWorld[0];
+	au[1] = m_m4ToWorld[1];
+	au[2] = m_m4ToWorld[2];
+
+	vector3 bu[3];
+	bu[0] = a_pOther->m_m4ToWorld[0];
+	bu[1] = a_pOther->m_m4ToWorld[1];
+	bu[2] = a_pOther->m_m4ToWorld[2];
 	vector3 ac, bc, ae, be;
 	ac = GetCenterGlobal();
 	bc = a_pOther->GetCenterGlobal();
@@ -25,17 +34,17 @@ uint MyRigidBody::SAT(MyRigidBody* const a_pOther)
 	// Compute Rotation matrix expressing other in this coordinate frame
 	for (uint i = 0; i < 3; i++) {
 		for (uint j = 0; j < 3; j++) {
-			m3RotA[i][j] = glm::dot(m_m4ToWorld[i], a_pOther->m_m4ToWorld[j]);
+			m3RotA[i][j] = glm::dot(au[i], bu[j]);
 		}
 	}
 	vector3 v3Translation = bc - ac;
 	// Bring translation into this object's local space
-	v3Translation = vector3(glm::dot(v3Translation, glm::vec3(m_m4ToWorld[0])), glm::dot(v3Translation, glm::vec3(m_m4ToWorld[1])), glm::dot(v3Translation, glm::vec3(m_m4ToWorld[2])));
+	v3Translation = vector3(glm::dot(v3Translation, au[0]), glm::dot(v3Translation, au[1]), glm::dot(v3Translation, au[2]));
 
 	// Compute common subexpressions
 	for (uint i = 0; i < 3; i++) {
 		for (uint j = 0; j < 3; j++) {
-			m3RotB[i][j] = glm::abs(m3RotA[i][j]) + DBL_EPSILON;
+			m3RotB[i][j] = glm::abs(m3RotA[i][j]) + glm::epsilon<float>();
 		}
 	}
 
