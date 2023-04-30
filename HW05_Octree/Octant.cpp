@@ -89,26 +89,6 @@ bool Octant::IsColliding(uint a_uRBIndex)
 void Octant::Display(uint a_nIndex, vector3 a_v3Color)
 {
 	// Display the specified octant
-	/*if (a_nIndex == 0)
-	{
-		m_pModelMngr->AddWireCubeToRenderList(glm::translate(IDENTITY_M4, m_v3Center) *
-			glm::scale(vector3(m_fSize)), a_v3Color);
-		return;
-	}
-	for (uint i = 0; i < m_uChildren; i++)
-	{
-		if (m_pChild[i] != nullptr)
-		{
-			if (m_pChild[i]->m_uID == a_nIndex)
-			{
-				m_pModelMngr->AddWireCubeToRenderList(glm::translate(IDENTITY_M4, m_pChild[i]->GetCenterGlobal()) *
-					glm::scale(vector3(m_pChild[i]->m_fSize)), a_v3Color);
-				return;
-			}
-			else
-				m_pChild[i]->Display(a_nIndex, a_v3Color);
-		}
-	} */
 	if (m_uID == a_nIndex) {
 		m_pModelMngr->AddWireCubeToRenderList(glm::translate(IDENTITY_M4, m_v3Center) *
 			glm::scale(vector3(m_fSize)), a_v3Color);
